@@ -31,17 +31,20 @@ The `BrainGlobe Registration` plugin will appear on the right hand side of the n
 ![brainglobe-registration-atlas-selection](./imgs/brainglobe_registration_atlas_selection.png)
 The atlas will appear in the napari viewer. Select the approximate `Z` slice of the atlas that you want to register to,
 using the slider at the bottom of the napari viewer.
-![brainglobe-registration-atlas-selection](./imgs/brainglobe_registration_atlas_selection_2.png)
-6. Adjust the sample image to roughly match the atlas image.
+Or, you can click on the `Select best matching slice with similarity metrics` to automatically select the region best for align with the given image. We give three different metrics `NCC, MI, SSIM` to choose from (NCC recommended for most cases).
+![brainglobe-registration-match-slices](./imgs/brainglobe-registration_match_slices.png)
+Upon clicking the `find best matching slice button` the `Z`- slider will automatically jump to the best matching region, thus you don't need to select the appropriate `Z` slice manually.  And then you can proceed to the rest of the steps as before.
+![brainglobe-registration-jump-z](./imgs/brainglobe-registration_jump_z_stack.png)
+![brainglobe-registration-overlay](./imgs/brainglobe_registration_overlay.png)
+7. Adjust the sample image to roughly match the atlas image.
 You can do this by adjusting X and Y translation as well as rotating around the centre of the image.
 You can overlay the two images by toggling `Grid` mode in the napari viewer (Ctrl+G).
 You can then adjust the color map and opacity of the atlas image to make manual alignment easier.
-![brainglobe-registration-overlay](./imgs/brainglobe_registration_overlay.png)
 The sample image can be reset to its original position and orientation by clicking `Reset Image` in the `BrainGlobe Registration` plugin window.
-7. Select the transformations you want to use from the dropdown menu. Set the transformation type to empty to remove a step.
+9. Select the transformations you want to use from the dropdown menu. Set the transformation type to empty to remove a step.
 Select from one of the three provided default parameter sets (elastix, ARA, or IBL). Customise the parameters further in the
 `Parameters` tab.
-8. Click `Run` to register the image. The registered image will appear in the napari viewer.
+10. Click `Run` to register the image. The registered image will appear in the napari viewer.
 ![brainglobe-registration-registered](./imgs/brainglobe_registration_registered.png)
 ![brainglobe-registration-registered](./imgs/brainglobe_registration_registered_stacked.png)
 
