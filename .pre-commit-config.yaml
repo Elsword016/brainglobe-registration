@@ -2,7 +2,7 @@
 ci:
     autoupdate_schedule: monthly
 
-exclude: 'conf.py'
+exclude: '(conf\.py|.*\.ipynb)'
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v5.0.0

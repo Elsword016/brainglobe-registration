@@ -220,3 +220,22 @@ def test_on_atlas_reset_no_atlas(registration_widget, mocker):
     mocked_show_error.assert_called_once_with(
         "No atlas selected. Please select an atlas before resetting"
     )
+
+
+def test_similarity_metrics_widget_integration(registration_widget):
+    """Test integration of SimilarityMetricsView in RegistrationWidget."""
+    # Check that the similarity metrics widget is initialized
+    assert registration_widget.similarity_metrics_widget is not None
+    from brainglobe_registration.widgets.similarity_metrics_view import (
+        SimilarityMetricsView,
+    )
+
+    assert isinstance(
+        registration_widget.similarity_metrics_widget, SimilarityMetricsView
+    )
+
+    # Check that the widget has the correct parent
+    assert (
+        registration_widget.similarity_metrics_widget._parent
+        == registration_widget
+    )

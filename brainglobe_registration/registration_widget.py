@@ -60,6 +60,9 @@ from brainglobe_registration.widgets.parameter_list_view import (
     RegistrationParameterListView,
 )
 from brainglobe_registration.widgets.select_images_view import SelectImagesView
+from brainglobe_registration.widgets.similarity_metrics_view import (
+    SimilarityMetricsView,
+)
 from brainglobe_registration.widgets.transform_select_view import (
     TransformSelectView,
 )
@@ -68,16 +71,18 @@ from brainglobe_registration.widgets.transform_select_view import (
 class RegistrationWidget(QScrollArea):
     def __init__(self, napari_viewer: Viewer):
         super().__init__()
+        self._viewer = napari_viewer
+
+        # Create the main widget to hold all content
         self._widget = CollapsibleWidgetContainer()
         self._widget.setContentsMargins(10, 10, 10, 10)
 
-        self._viewer = napari_viewer
+        # Setup variables
         self._atlas: Optional[BrainGlobeAtlas] = None
         self._atlas_data_layer: Optional[napari.layers.Image] = None
         self._atlas_annotations_layer: Optional[napari.layers.Labels] = None
         self._moving_image: Optional[napari.layers.Image] = None
         self._moving_image_data_backup: Optional[npt.NDArray] = None
-        # Flag to differentiate between manual and automatic atlas deletion
         self._automatic_deletion_flag = False
 
         self.transform_params: dict[str, dict] = {
@@ -156,6 +161,8 @@ class RegistrationWidget(QScrollArea):
             self._on_default_file_selection_change
         )
 
+        self.similarity_metrics_widget = SimilarityMetricsView(parent=self)
+
         # Use decorator to connect to layer deletion event
         self._connect_events()
 
@@ -183,24 +190,6 @@ class RegistrationWidget(QScrollArea):
         self.run_button.clicked.connect(self._on_run_button_click)
         self.run_button.setEnabled(False)
 
-        self._widget.add_widget(
-            header_widget(
-                "brainglobe-<br>registration",  # line break at <br>
-                "Registration with Elastix",
-                github_repo_name="brainglobe-registration",
-            ),
-            collapsible=False,
-        )
-        self._widget.add_widget(
-            self.get_atlas_widget, widget_title="Select Images"
-        )
-        self._widget.add_widget(
-            self.adjust_moving_image_widget, widget_title="Prepare Images"
-        )
-        self._widget.add_widget(
-            self.transform_select_view, widget_title="Select Transformations"
-        )
-
         self.parameter_setting_tabs_lists = []
         self.parameters_tab = QTabWidget(parent=self)
 
@@ -213,24 +202,62 @@ class RegistrationWidget(QScrollArea):
             self.parameters_tab.addTab(new_tab, transform_type)
             self.parameter_setting_tabs_lists.append(new_tab)
 
+        # UI Construction - First add header
         self._widget.add_widget(
+            header_widget(
+                "brainglobe-<br>registration",
+                "Registration with Elastix",
+                github_repo_name="brainglobe-registration",
+            ),
+            collapsible=False,
+        )
+
+        # Next add the select images widget
+        self._widget.add_widget(
+            self.get_atlas_widget, widget_title="Select Images"
+        )
+
+        # Add the adjust moving image widget
+        self._widget.add_widget(
+            self.adjust_moving_image_widget, widget_title="Prepare Images"
+        )
+
+        # Add the similarity metrics widget
+        self._widget.add_widget(
+            self.similarity_metrics_widget,
+            widget_title="Select best matching slice with similarity metrics",
+        )
+
+        # Add transformations widget
+        self._widget.add_widget(
+            self.transform_select_view, widget_title="Select Transformations"
+        )
+
+        # Store a reference to the advanced settings widget for collapsing
+        self.advanced_settings_widget = self._widget.add_widget(
             self.parameters_tab, widget_title="Advanced Settings (optional)"
         )
 
+        # Add remaining UI elements (filter checkbox, output directory,
+        # run button, etc.)
         self._widget.add_widget(self.filter_checkbox, collapsible=False)
-
         self._widget.add_widget(QLabel("Output Directory"), collapsible=False)
         self._widget.add_widget(
             self.output_directory_widget, collapsible=False
         )
         self._widget.add_widget(self.run_button, collapsible=False)
 
-        self._widget.layout().itemAt(1).widget().collapse(animate=False)
+        # Collapse the advanced settings widget using the stored reference
+        if hasattr(self.advanced_settings_widget, "collapse"):
+            self.advanced_settings_widget.collapse(animate=False)
 
         check_atlas_installed(self)
 
         self.setWidgetResizable(True)
         self.setWidget(self._widget)
+
+        # Add stretch at the end to keep widgets at the top
+        self._widget.layout().addStretch()
 
     def _connect_events(self):
         @self._viewer.layers.events.removed.connect
