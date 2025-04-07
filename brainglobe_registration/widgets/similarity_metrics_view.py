@@ -1,4 +1,3 @@
-import dask.array as da
 import napari
 import napari.layers
 import numpy as np
@@ -20,6 +19,8 @@ class SimilarityMetricsView(QWidget):
 
     This widget allows users to select a similarity metric and find the best
     matching atlas slice for a given sample image.
+
+    For now, only 2D registration is supported.
     """
 
     def __init__(self, parent=None):
@@ -82,15 +83,8 @@ class SimilarityMetricsView(QWidget):
             QApplication.processEvents()  # Update UI
 
             # Get the data - ensure we're working with numpy arrays
-            if isinstance(sample_layer.data, da.Array):
-                sample_img = np.asarray(sample_layer.data.compute())
-            else:
-                sample_img = np.asarray(sample_layer.data)
-
-            if isinstance(atlas_layer.data, da.Array):
-                atlas_volume = np.asarray(atlas_layer.data.compute())
-            else:
-                atlas_volume = np.asarray(atlas_layer.data)
+            sample_img = np.asarray(sample_layer.data)
+            atlas_volume = np.asarray(atlas_layer.data)
 
             # Get the selected metric name
             metric_name = self.metric_combo.currentText().lower()
